@@ -1,0 +1,77 @@
+--Stored Procedure --
+CREATE OR ALTER PROCEDURE bronze.load_bronze_layer AS
+BEGIN
+
+	DECLARE @starttime DATETIME, @endtime DATETIME;
+	BEGIN TRY
+		PRINT 'Loading Bronze Layer';
+		SET @starttime = GETDATE();  -- calculate time to load table --
+		-- CRM INSERT --
+		PRINT 'Loading CRM';
+		TRUNCATE TABLE bronze.crm_cust_info
+		BULK INSERT bronze.crm_cust_info
+		FROM 'C:\Users\Aun\Downloads\Source.crm\cust_info.csv'
+		WITH (						-- (CSV file header fix in addition to delimiter seperator)
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK 
+		);
+		SET @endtime = GETDATE();
+		PRINT 'Load Duration ' + CAST(DATEDIFF (second, @starttime, @endtime) AS NVARCHAR) + ' seconds';
+
+		TRUNCATE TABLE bronze.crm_prd_info
+		BULK INSERT bronze.crm_prd_info
+		FROM 'C:\Users\Aun\Downloads\Source.crm\prd_info.csv'
+		WITH (						-- (CSV file header fix in addition to delimiter seperator)
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK 
+		);
+
+		TRUNCATE TABLE bronze.crm_sales_details
+		BULK INSERT bronze.crm_sales_details
+		FROM 'C:\Users\Aun\Downloads\Source.crm\sales_details.csv'
+		WITH (						-- (CSV file header fix in addition to delimiter seperator)
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK 
+		);
+
+		-- ERP INSERT--
+		PRINT 'Loading CRM';
+
+		TRUNCATE TABLE bronze.erp_PX_CAT_G1V2
+		BULK INSERT bronze.erp_PX_CAT_G1V2
+		FROM 'C:\Users\Aun\Downloads\Source.erp\PX_CAT_G1V2.csv'
+		WITH (						-- (CSV file header fix in addition to delimiter seperator)
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK 
+		);
+
+		TRUNCATE TABLE bronze.erp_LOC_A101
+		BULK INSERT bronze.erp_LOC_A101
+		FROM 'C:\Users\Aun\Downloads\Source.erp\LOC_A101.csv'
+		WITH (						-- (CSV file header fix in addition to delimiter seperator)
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK 
+		);
+
+		TRUNCATE TABLE bronze.erp_CUST_AZ12
+		BULK INSERT bronze.erp_CUST_AZ12
+		FROM 'C:\Users\Aun\Downloads\Source.erp\CUST_AZ12.csv'
+		WITH (						-- (CSV file header fix in addition to delimiter seperator)
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK 
+		);
+	END TRY
+	BEGIN CATCH -- Try to catch errors, will only execute when SQL fails --
+		PRINT '==============';
+		PRINT 'Error during Loading';
+		PRINT 'Error msg' + ERROR_MESSAGE();
+		PRINT 'Error msg' + CAST (ERROR_MESSAGE() AS NVARCHAR);
+		PRINT 'Error msg' + CAST (ERROR_STATE() AS NVARCHAR);
+	END CATCH
+END
